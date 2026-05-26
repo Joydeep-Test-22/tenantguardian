@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TenantGuardian AI — Microsoft 365 Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+:root{
+  --bg:       #060d18;
+  --bg2:      #080f1e;
+  --surface:  #0d1829;
+  --border:   #142036;
+  --border2:  #1a2d4a;
+  --blue:     #0078d4;
+  --cyan:     #00bcf2;
+  --green:    #16c784;
+  --amber:    #f59e0b;
+  --red:      #ef4444;
+  --text:     #94a3b8;
+  --heading:  #f0f6ff;
+  --mono:     'JetBrains Mono', monospace;
+  --serif:    'Instrument Serif', serif;
+  --sans:     'DM Sans', sans-serif;
+}
+
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  font-size:15px;
+  line-height:1.6;
+}
+
+/* ── NOISE TEXTURE ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.4;
+}
+
+/* ── GRID OVERLAY ── */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,120,212,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,120,212,.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;z-index:0;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:0 48px;height:64px;
+  display:flex;align-items:center;gap:16px;
+  background:rgba(6,13,24,.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(0,120,212,.1);
+}
+.nav-logo{
+  display:flex;align-items:center;gap:10px;
+  font-size:16px;font-weight:700;color:var(--heading);
+  letter-spacing:-.02em;text-decoration:none;
+}
+.nav-logo-mark{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(135deg,#0078d4,#00bcf2);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 20px rgba(0,120,212,.4);
+  flex-shrink:0;
+}
+.nav-links{
+  display:flex;align-items:center;gap:28px;
+  margin-left:40px;
+  list-style:none;
+}
+.nav-links a{
+  font-size:13.5px;font-weight:500;color:var(--text);
+  text-decoration:none;transition:color .15s;
+}
+.nav-links a:hover{color:var(--heading)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.btn-nav{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 20px;border-radius:7px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;text-decoration:none;
+  transition:all .18s;
+}
+.btn-nav-ghost{
+  background:transparent;border:1px solid var(--border2);color:var(--text);
+}
+.btn-nav-ghost:hover{border-color:var(--blue);color:var(--cyan)}
+.btn-nav-primary{
+  background:var(--blue);color:#fff;border:1px solid var(--blue);
+  box-shadow:0 0 20px rgba(0,120,212,.25);
+}
+.btn-nav-primary:hover{background:#106ebe;transform:translateY(-1px)}
+
+/* ── HERO ── */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:120px 48px 80px;
+  text-align:center;
+  overflow:hidden;
+}
+
+/* Glow orbs */
+.hero::before{
+  content:'';
+  position:absolute;
+  top:-200px;left:50%;transform:translateX(-50%);
+  width:800px;height:800px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,120,212,.12) 0%,transparent 65%);
+  pointer-events:none;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,120,212,.08);border:1px solid rgba(0,120,212,.2);
+  border-radius:20px;padding:6px 16px;margin-bottom:28px;
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  color:var(--cyan);letter-spacing:.08em;text-transform:uppercase;
+  animation:fadeUp .6s ease both;
+}
+.hero-badge-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.hero h1{
+  font-family:var(--serif);
+  font-size:clamp(48px,6vw,82px);
+  font-weight:400;
+  color:var(--heading);
+  line-height:1.08;
+  letter-spacing:-.02em;
+  margin-bottom:12px;
+  animation:fadeUp .6s .1s ease both;
+}
+.hero h1 em{
+  font-style:italic;
+  background:linear-gradient(135deg,#0078d4,#00bcf2 50%,#16c784);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-sub{
+  font-size:18px;color:var(--text);
+  max-width:560px;margin:0 auto 40px;
+  line-height:1.7;font-weight:400;
+  animation:fadeUp .6s .2s ease both;
+}
+
+.hero-actions{
+  display:flex;align-items:center;justify-content:center;
+  gap:12px;flex-wrap:wrap;margin-bottom:64px;
+  animation:fadeUp .6s .3s ease both;
+}
+.btn-hero-primary{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 28px;border-radius:9px;
+  background:var(--blue);color:#fff;
+  font-size:14px;font-weight:700;font-family:inherit;
+  text-decoration:none;border:none;cursor:pointer;
+  box-shadow:0 0 32px rgba(0,120,212,.3);
+  transition:all .18s;
+}
+.btn-hero-primary:hover{background:#106ebe;transform:translateY(-2px);box-shadow:0 0 40px rgba(0,120,212,.4)}
+.btn-hero-ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 28px;border-radius:9px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border2);color:var(--text);
+  font-size:14px;font-weight:700;font-family:inherit;
+  text-decoration:none;cursor:pointer;
+  transition:all .18s;
+}
+.btn-hero-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ── LIVE STATS ── */
+.live-stats{
+  display:inline-flex;align-items:center;gap:0;
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;
+  animation:fadeUp .6s .4s ease both;
+}
+.stat-item{
+  padding:16px 28px;
+  border-right:1px solid var(--border);
+  text-align:center;
+}
+.stat-item:last-child{border-right:none}
+.stat-val{
+  font-family:var(--mono);font-size:22px;font-weight:700;
+  color:var(--heading);line-height:1;margin-bottom:4px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.stat-val.green{color:var(--green)}
+.stat-val.blue{color:var(--cyan)}
+.stat-val.amber{color:var(--amber)}
+.stat-label{font-size:11px;color:var(--text);font-family:var(--mono);letter-spacing:.04em}
+
+/* ── DASHBOARD PREVIEW ── */
+.preview-wrap{
+  position:relative;z-index:1;
+  padding:0 48px 80px;
+  animation:fadeUp .8s .5s ease both;
+}
+.preview-frame{
+  max-width:1100px;margin:0 auto;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 40px 120px rgba(0,0,0,.6),0 0 0 1px rgba(0,120,212,.1);
+}
+.preview-bar{
+  height:40px;background:#080f1e;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:8px;
+}
+.preview-dot{width:10px;height:10px;border-radius:50%}
+.preview-url{
+  flex:1;margin:0 12px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:5px;height:22px;
+  display:flex;align-items:center;padding:0 10px;
+  font-family:var(--mono);font-size:10px;color:var(--text);
+}
+.preview-content{padding:24px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.preview-kpi{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:14px;
+}
+.preview-kpi-label{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2d4a6a;margin-bottom:8px}
+.preview-kpi-val{font-size:26px;font-weight:800;line-height:1;margin-bottom:3px}
+.preview-kpi-sub{font-size:10px;color:#2d4a6a}
+.preview-ai{
+  grid-column:1/-1;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:16px;margin-top:4px;
+}
+.preview-ai-header{
+  display:flex;align-items:center;gap:8px;margin-bottom:10px;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);
+}
+.preview-ai-text{
+  font-size:12px;color:#4d6a8a;line-height:1.7;
+}
+.preview-ai-text strong{color:#64748b}
+
+/* ── SECTION ── */
+section{position:relative;z-index:1;padding:100px 48px}
+.section-label{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-label::before{content:'';width:20px;height:1px;background:var(--cyan)}
+.section-title{
+  font-family:var(--serif);font-size:clamp(36px,4vw,56px);
+  color:var(--heading);line-height:1.1;
+  letter-spacing:-.02em;margin-bottom:16px;
+}
+.section-sub{
+  font-size:16px;color:var(--text);
+  max-width:520px;line-height:1.75;
+}
+
+/* ── HOW IT WORKS ── */
+.steps{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  margin-top:56px;
+}
+.step{
+  background:var(--bg);padding:36px 32px;
+  position:relative;
+  transition:background .2s;
+}
+.step:hover{background:var(--surface)}
+.step-num{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.12em;color:var(--border2);
+  margin-bottom:20px;
+}
+.step-icon{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:18px;
+}
+.step h3{
+  font-size:17px;font-weight:700;color:var(--heading);
+  margin-bottom:8px;letter-spacing:-.01em;
+}
+.step p{font-size:13.5px;color:var(--text);line-height:1.7}
+.step-arrow{
+  position:absolute;top:50%;right:-1px;
+  transform:translateY(-50%);
+  width:20px;height:20px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--border2);font-size:12px;
+}
+
+/* ── FEATURES ── */
+.features-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:16px;margin-top:56px;
+}
+.feat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:28px;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.feat-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,120,212,.04),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.feat-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{
+  width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;flex-shrink:0;
+}
+.feat-card h3{
+  font-size:16px;font-weight:700;color:var(--heading);
+  margin-bottom:8px;letter-spacing:-.01em;
+}
+.feat-card p{font-size:13px;color:var(--text);line-height:1.7}
+.feat-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:14px;
+  background:rgba(0,120,212,.08);border:1px solid rgba(0,120,212,.15);
+  border-radius:4px;padding:3px 9px;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  color:var(--cyan);letter-spacing:.06em;text-transform:uppercase;
+}
+
+/* ── AI SHOWCASE ── */
+.ai-showcase{
+  max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1.4fr;gap:0;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;margin-top:56px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.ai-left{
+  padding:48px 40px;border-right:1px solid var(--border);
+  background:linear-gradient(160deg,#080f1e,#060d18);
+}
+.ai-left h3{
+  font-family:var(--serif);font-size:32px;color:var(--heading);
+  line-height:1.2;margin-bottom:16px;letter-spacing:-.02em;
+}
+.ai-left p{font-size:14px;color:var(--text);line-height:1.75;margin-bottom:24px}
+.ai-capabilities{display:flex;flex-direction:column;gap:10px}
+.ai-cap{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;background:rgba(0,120,212,.06);
+  border:1px solid rgba(0,120,212,.12);border-radius:8px;
+}
+.ai-cap-icon{
+  width:32px;height:32px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.ai-cap-text{font-size:13px;font-weight:600;color:var(--heading)}
+.ai-cap-sub{font-size:11px;color:var(--text);margin-top:1px}
+
+.ai-right{
+  padding:32px;background:var(--bg2);
+  display:flex;flex-direction:column;gap:0;
+}
+.ai-output-header{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;background:var(--surface);
+  border:1px solid var(--border);border-radius:8px 8px 0 0;
+  border-bottom:none;
+}
+.ai-output-label{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);
+}
+.ai-output-model{
+  margin-left:auto;font-family:var(--mono);font-size:9px;
+  color:#2d4a6a;background:var(--bg);border:1px solid var(--border);
+  padding:2px 8px;border-radius:4px;
+}
+.ai-output-body{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:0 0 8px 8px;padding:20px;
+  font-size:12.5px;color:#64748b;line-height:1.85;
+  flex:1;
+}
+.ai-output-body h4{
+  font-size:13px;font-weight:700;color:#94a3b8;
+  margin:14px 0 6px;
+}
+.ai-output-body h4:first-child{margin-top:0}
+.ai-output-body strong{color:#94a3b8}
+.ai-output-body .highlight{color:var(--green);font-weight:700}
+.ai-output-body .warn{color:var(--amber);font-weight:700}
+.ai-output-body .danger{color:var(--red);font-weight:700}
+.typing-cursor{
+  display:inline-block;width:2px;height:14px;
+  background:var(--cyan);margin-left:2px;
+  vertical-align:middle;
+  animation:blink .7s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── SECURITY SECTION ── */
+.security-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+  margin-top:48px;max-width:900px;
+}
+.security-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:24px;
+  display:flex;gap:16px;align-items:flex-start;
+}
+.security-icon{
+  width:40px;height:40px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.security-card h4{
+  font-size:14px;font-weight:700;color:var(--heading);margin-bottom:4px;
+}
+.security-card p{font-size:12.5px;color:var(--text);line-height:1.65}
+
+/* ── PRICING ── */
+.pricing-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  margin-top:56px;max-width:900px;
+}
+.price-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:32px 28px;position:relative;
+  transition:border-color .2s;
+}
+.price-card.featured{
+  border-color:rgba(0,120,212,.4);
+  background:linear-gradient(160deg,rgba(0,120,212,.06),var(--surface));
+}
+.price-card.featured::before{
+  content:'Most Popular';
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--blue);color:#fff;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 12px;border-radius:10px;white-space:nowrap;
+}
+.price-tier{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin-bottom:12px}
+.price-users{font-size:13px;color:var(--text);margin-bottom:20px}
+.price-val{
+  font-family:var(--mono);font-size:32px;font-weight:700;
+  color:var(--heading);line-height:1;margin-bottom:4px;
+}
+.price-period{font-size:12px;color:var(--text);margin-bottom:24px}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:28px}
+.price-features li{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;color:var(--text);
+}
+.price-features li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.btn-price{
+  width:100%;padding:11px;border-radius:7px;
+  font-size:13px;font-weight:700;font-family:inherit;
+  cursor:pointer;text-align:center;text-decoration:none;
+  display:block;transition:all .18s;
+}
+.btn-price-ghost{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.btn-price-ghost:hover{border-color:var(--blue);color:var(--cyan)}
+.btn-price-primary{background:var(--blue);color:#fff;border:1px solid var(--blue)}
+.btn-price-primary:hover{background:#106ebe}
+
+/* ── TESTIMONIAL / TRUST ── */
+.trust-bar{
+  display:flex;align-items:center;justify-content:center;
+  gap:40px;flex-wrap:wrap;
+  padding:32px 48px;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,.01);
+  position:relative;z-index:1;
+}
+.trust-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;color:var(--text);font-weight:500;
+}
+.trust-check{color:var(--green);font-size:16px}
+
+/* ── CTA ── */
+.cta-section{
+  text-align:center;padding:120px 48px;
+  position:relative;z-index:1;overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,120,212,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.cta-section h2{
+  font-family:var(--serif);font-size:clamp(40px,5vw,68px);
+  color:var(--heading);line-height:1.1;
+  letter-spacing:-.02em;margin-bottom:16px;
+}
+.cta-section p{
+  font-size:17px;color:var(--text);
+  max-width:480px;margin:0 auto 40px;line-height:1.75;
+}
+
+/* ── FOOTER ── */
+footer{
+  position:relative;z-index:1;
+  border-top:1px solid var(--border);
+  padding:32px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;
+}
+.footer-brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--heading);font-size:14px}
+.footer-copy{font-size:12px;color:#2d4a6a}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:12px;color:#2d4a6a;text-decoration:none;transition:color .15s}
+.footer-links a:hover{color:var(--text)}
+
+/* ── CONTACT FORM ── */
+.contact-form{
+  max-width:520px;margin:40px auto 0;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:32px;text-align:left;
+}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-weight:700;color:var(--heading);margin-bottom:6px;letter-spacing:.02em}
+.form-input{
+  width:100%;background:var(--bg2);border:1px solid var(--border2);
+  border-radius:7px;padding:10px 14px;
+  font-size:13.5px;color:var(--heading);font-family:inherit;
+  outline:none;transition:border-color .15s;
+}
+.form-input:focus{border-color:var(--blue)}
+.form-input::placeholder{color:#2d4a6a}
+textarea.form-input{resize:vertical;min-height:90px}
+.form-submit{
+  width:100%;padding:12px;border-radius:7px;
+  background:var(--blue);color:#fff;
+  font-size:14px;font-weight:700;font-family:inherit;
+  border:none;cursor:pointer;transition:all .18s;
+  margin-top:4px;
+}
+.form-submit:hover{background:#106ebe;transform:translateY(-1px)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.reveal{
+  opacity:0;transform:translateY(32px);
+  transition:opacity .7s ease,transform .7s ease;
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </div>
+    TenantGuardian <span style="color:#00bcf2;margin-left:3px">AI</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#security">Security</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="#contact" class="btn-nav btn-nav-ghost">Request Demo</a>
+    <a href="TenantGuardianAI.html" class="btn-nav btn-nav-primary">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Sign In
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div style="max-width:800px;position:relative;z-index:1">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Microsoft 365 Intelligence · Powered by Phi-4 AI
+    </div>
+
+    <h1>
+      Your M365 tenant.<br/>
+      <em>Completely transparent.</em>
+    </h1>
+
+    <p class="hero-sub">
+      TenantGuardian AI connects to your Microsoft 365 environment and delivers real-time security posture, licence waste detection, and AI-generated executive reports — in under 60 seconds.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#contact" class="btn-hero-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        Request a Free Demo
+      </a>
+      <a href="#how" class="btn-hero-ghost">
+        See how it works →
+      </a>
+    </div>
+
+    <!-- LIVE STATS -->
+    <div class="live-stats">
+      <div class="stat-item">
+        <div class="stat-val green" id="statWaste">₹0</div>
+        <div class="stat-label">Licence waste identified</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val blue" id="statGaps">0</div>
+        <div class="stat-label">Security gaps found</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val amber" id="statTenants">0</div>
+        <div class="stat-label">Tenants protected</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" style="color:#a855f7" id="statUsers">0</div>
+        <div class="stat-label">Users analysed</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD PREVIEW -->
+<div class="preview-wrap reveal">
+  <div class="preview-frame">
+    <div class="preview-bar">
+      <div class="preview-dot" style="background:#ff5f57"></div>
+      <div class="preview-dot" style="background:#febc2e"></div>
+      <div class="preview-dot" style="background:#28c840"></div>
+      <div class="preview-url">
+        🔒 tenantguardian.ai — Tenant Intelligence Dashboard
+      </div>
+    </div>
+    <div class="preview-content">
+      <div class="preview-kpi">
+        <div class="preview-kpi-label">Secure Score</div>
+        <div class="preview-kpi-val" style="color:#16c784">67%</div>
+        <div class="preview-kpi-sub">security posture</div>
+      </div>
+      <div class="preview-kpi">
+        <div class="preview-kpi-label">Wasted Licences</div>
+        <div class="preview-kpi-val" style="color:#ef4444">12</div>
+        <div class="preview-kpi-sub">zero activity 90d</div>
+      </div>
+      <div class="preview-kpi">
+        <div class="preview-kpi-label">Monthly Waste</div>
+        <div class="preview-kpi-val" style="color:#f59e0b">$684</div>
+        <div class="preview-kpi-sub">reclaimable now</div>
+      </div>
+      <div class="preview-kpi">
+        <div class="preview-kpi-label">No MFA</div>
+        <div class="preview-kpi-val" style="color:#ef4444">9</div>
+        <div class="preview-kpi-sub">accounts at risk</div>
+      </div>
+      <div class="preview-ai">
+        <div class="preview-ai-header">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00bcf2" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+          AI Tenant Executive Summary · microsoft/phi-4
+        </div>
+        <div class="preview-ai-text" id="previewAIText">
+          <strong>Executive Summary —</strong> Your tenant presents <span style="color:#ef4444;font-weight:700">3 critical security gaps</span> requiring immediate attention. MFA coverage at 44% is significantly below the industry benchmark of 89%, creating substantial cyber insurance and compliance risk. <strong>12 licences</strong> showing zero activity across Exchange, Teams, and SharePoint for 90+ days represent <span style="color:#f59e0b;font-weight:700">$8,208 in annual waste</span>. Recommended immediate actions: enforce MFA via Conditional Access, reclaim top 5 wasted licences, and review the 3 stale admin accounts...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRUST BAR -->
+<div class="trust-bar reveal">
+  <div class="trust-item"><span class="trust-check">✓</span> Microsoft Entra ID authentication</div>
+  <div class="trust-item"><span class="trust-check">✓</span> Zero data storage</div>
+  <div class="trust-item"><span class="trust-check">✓</span> Data never leaves Azure boundary</div>
+  <div class="trust-item"><span class="trust-check">✓</span> Role-based access control</div>
+  <div class="trust-item"><span class="trust-check">✓</span> £0 running cost</div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label reveal">How it works</div>
+    <h2 class="section-title reveal">From sign-in to insights<br/>in under 60 seconds.</h2>
+    <p class="section-sub reveal">No agents. No data exports. No configuration. Connect once with your Microsoft work account and your entire tenant intelligence is live.</p>
+
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon" style="background:rgba(0,120,212,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0078d4" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        </div>
+        <h3>Sign in with Microsoft</h3>
+        <p>One click with your existing Microsoft 365 work account. Microsoft Entra ID handles all authentication — no separate credentials ever created.</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon" style="background:rgba(0,188,242,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00bcf2" stroke-width="2"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </div>
+        <h3>Graph API pulls everything</h3>
+        <p>Microsoft Graph API fetches users, licences, security score, MFA status, activity reports, incidents, and message centre — all in parallel, all in real time.</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon" style="background:rgba(22,199,132,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16c784" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        </div>
+        <h3>AI analyses everything</h3>
+        <p>Microsoft Phi-4 scores every user, identifies security gaps, calculates financial waste, and writes executive-ready reports — CISO briefings, CFO savings reports, compliance assessments.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="background:rgba(255,255,255,.01);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label reveal">Platform modules</div>
+    <h2 class="section-title reveal">Everything your IT team<br/>needs in one place.</h2>
+
+    <div class="features-grid reveal">
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(22,199,132,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16c784" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Microsoft Secure Score</h3>
+        <p>Live security posture ring chart, category breakdown across Identity, Data and Device, top improvement actions sorted by points available.</p>
+        <div class="feat-tag">🛡️ Security</div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(239,68,68,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+        </div>
+        <h3>Licence Waste Detection</h3>
+        <p>AI-scored waste detection across all licensed users. Identifies zero-activity accounts, calculates exact monthly cost, prioritises by reclaim urgency.</p>
+        <div class="feat-tag">💰 Cost Optimisation</div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(139,92,246,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3>Identity & MFA Analysis</h3>
+        <p>Full MFA registration status, method breakdown, stale accounts, never-signed-in users, guest accounts and privileged user risk scoring.</p>
+        <div class="feat-tag">🔐 Identity</div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(0,120,212,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0078d4" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <h3>Exchange & Teams Usage</h3>
+        <p>Per-user activity across Exchange Online and Microsoft Teams — emails sent, calls made, meetings organised, last activity dates and inactivity flags.</p>
+        <div class="feat-tag">📊 Usage Analytics</div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(245,158,11,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        </div>
+        <h3>Service Health & Incidents</h3>
+        <p>Live M365 service disruptions, active advisories, resolved incidents, and Message Centre announcements — all in real time from Microsoft's own API.</p>
+        <div class="feat-tag">🔔 Service Health</div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(0,188,242,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00bcf2" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        </div>
+        <h3>AI Executive Reports</h3>
+        <p>One click generates a CFO savings report, CISO security briefing, compliance assessment, or draft communications — written by Microsoft Phi-4 using your real tenant data.</p>
+        <div class="feat-tag">🤖 Phi-4 AI</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI SHOWCASE -->
+<section>
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label reveal">AI Intelligence</div>
+    <h2 class="section-title reveal">The AI doesn't just find problems.<br/>It writes the solution.</h2>
+
+    <div class="ai-showcase reveal">
+      <div class="ai-left">
+        <h3>From raw data to boardroom-ready reports in one click.</h3>
+        <p>Microsoft Phi-4 reads your entire tenant — security scores, user activity, licence waste, compliance gaps — and generates reports your CFO, CISO, and IT team can act on immediately.</p>
+        <div class="ai-capabilities">
+          <div class="ai-cap">
+            <div class="ai-cap-icon" style="background:rgba(22,199,132,.1)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16c784" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            </div>
+            <div>
+              <div class="ai-cap-text">CFO Savings Report</div>
+              <div class="ai-cap-sub">Financial waste analysis with 3 reclaim scenarios</div>
+            </div>
+          </div>
+          <div class="ai-cap">
+            <div class="ai-cap-icon" style="background:rgba(239,68,68,.1)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+              <div class="ai-cap-text">CISO Security Briefing</div>
+              <div class="ai-cap-sub">Risk assessment with remediation priority order</div>
+            </div>
+          </div>
+          <div class="ai-cap">
+            <div class="ai-cap-icon" style="background:rgba(139,92,246,.1)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
+            </div>
+            <div>
+              <div class="ai-cap-text">Compliance Assessment</div>
+              <div class="ai-cap-sub">GDPR, ISO 27001, NIST CSF, SOC 2 posture</div>
+            </div>
+          </div>
+          <div class="ai-cap">
+            <div class="ai-cap-icon" style="background:rgba(0,120,212,.1)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0078d4" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg>
+            </div>
+            <div>
+              <div class="ai-cap-text">Draft Communications</div>
+              <div class="ai-cap-sub">Manager emails, user notifications, Teams messages</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-right">
+        <div class="ai-output-header">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00bcf2" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+          <div class="ai-output-label">CFO Savings Report — Generated by Phi-4</div>
+          <div class="ai-output-model">microsoft/phi-4 · free</div>
+        </div>
+        <div class="ai-output-body">
+          <h4>## Executive Summary</h4>
+          Analysis of your Microsoft 365 tenant reveals <span class="danger">$8,208 in annual licence waste</span> across 12 inactive users. Immediate reclamation of top 5 accounts delivers <span class="highlight">$3,420 annual savings</span> with zero operational risk.
+
+          <h4>## Key Financial Findings</h4>
+          • <strong>12 wasted licences</strong> at $57/user/month = <span class="warn">$684/month</span><br/>
+          • <strong>3 underused licences</strong> — candidates for plan downgrade<br/>
+          • <strong>Longest inactive account:</strong> 308 days — Anoop M<br/>
+          • <strong>Annual projection</strong> if unaddressed: <span class="danger">$8,208</span>
+
+          <h4>## 30-Day Action Plan</h4>
+          1. Reclaim 5 critical accounts → saves $285/month immediately<br/>
+          2. Confirm 4 borderline accounts with managers → saves $228/month<br/>
+          3. Downgrade 3 underused E5 → E3 → saves $84/month<br/>
+
+          <span class="highlight">Total achievable savings: $597/month = $7,164/year</span><div class="typing-cursor"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section id="security" style="background:rgba(255,255,255,.01);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label reveal">Security & Privacy</div>
+    <h2 class="section-title reveal">Your data never leaves<br/>Microsoft's boundary.</h2>
+    <p class="section-sub reveal">Built on zero-trust principles. No servers, no databases, no data transmission. TenantGuardian AI is a browser-side application that calls Microsoft's own APIs directly.</p>
+
+    <div class="security-grid reveal">
+      <div class="security-card">
+        <div class="security-icon" style="background:rgba(22,199,132,.1)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16c784" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <h4>Microsoft Entra ID Authentication</h4>
+          <p>All authentication handled by Microsoft's own identity platform. TenantGuardian never sees or stores your credentials.</p>
+        </div>
+      </div>
+      <div class="security-card">
+        <div class="security-icon" style="background:rgba(0,120,212,.1)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0078d4" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div>
+          <h4>Zero Data Storage</h4>
+          <p>No database, no backend server, no data persistence. All data lives in your browser session and is cleared when you close the tab.</p>
+        </div>
+      </div>
+      <div class="security-card">
+        <div class="security-icon" style="background:rgba(139,92,246,.1)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <h4>Role-Based Access Control</h4>
+          <p>Admin role gets full AI access. Viewer role sees all data but no AI features. Enforced via Microsoft Entra App Roles — not client-side.</p>
+        </div>
+      </div>
+      <div class="security-card">
+        <div class="security-icon" style="background:rgba(0,188,242,.1)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00bcf2" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div>
+          <h4>Cloudflare Proxy for AI</h4>
+          <p>AI token stored in Cloudflare's encrypted environment — never in the browser, never in source code. Enterprise-grade secret management.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label reveal">Pricing</div>
+    <h2 class="section-title reveal">Simple, transparent pricing.<br/>No per-user fees.</h2>
+    <p class="section-sub reveal">Flat monthly fee per tenant. One price covers all your users. Running cost to us: ₹0 — so we pass the savings on.</p>
+
+    <div class="pricing-grid reveal">
+      <div class="price-card">
+        <div class="price-tier">Starter</div>
+        <div class="price-users">Up to 100 users</div>
+        <div class="price-val">₹20,000</div>
+        <div class="price-period">per tenant / month</div>
+        <ul class="price-features">
+          <li>Full dashboard access</li>
+          <li>Licence waste detection</li>
+          <li>Exchange & Teams usage</li>
+          <li>Service health monitoring</li>
+          <li>5 Admin + 10 Viewer seats</li>
+          <li>Email support</li>
+        </ul>
+        <a href="#contact" class="btn-price btn-price-ghost">Get started</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="price-tier">Professional</div>
+        <div class="price-users">101 – 500 users</div>
+        <div class="price-val">₹45,000</div>
+        <div class="price-period">per tenant / month</div>
+        <ul class="price-features">
+          <li>Everything in Starter</li>
+          <li>AI Reports (CFO, CISO, DLP)</li>
+          <li>Secure Score & Risky Users</li>
+          <li>Identity & MFA Analysis</li>
+          <li>Compliance Framework Status</li>
+          <li>Unlimited Admin seats</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#contact" class="btn-price btn-price-primary">Get started</a>
+      </div>
+
+      <div class="price-card">
+        <div class="price-tier">Enterprise</div>
+        <div class="price-users">500+ users / MSP</div>
+        <div class="price-val">Custom</div>
+        <div class="price-period">per tenant / month</div>
+        <ul class="price-features">
+          <li>Everything in Professional</li>
+          <li>Custom branding & white label</li>
+          <li>Multi-tenant management</li>
+          <li>Dedicated Cloudflare proxy</li>
+          <li>Quarterly business reviews</li>
+          <li>SLA guarantee</li>
+          <li>MSP reseller programme</li>
+        </ul>
+        <a href="#contact" class="btn-price btn-price-ghost">Contact us</a>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding:16px 20px;background:rgba(22,199,132,.06);border:1px solid rgba(22,199,132,.15);border-radius:8px;font-size:13px;color:#16c784;display:inline-flex;align-items:center;gap:10px" class="reveal">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
+      All plans include a free 30-day trial. No credit card required. Cancel anytime.
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2 class="reveal">Ready to see what's hiding<br/>in your tenant?</h2>
+  <p class="reveal">Most organisations find enough waste to pay for TenantGuardian in the first month. Request a free demo and we'll show you what it finds in your environment — live.</p>
+
+  <!-- CONTACT FORM -->
+  <div class="contact-form reveal" id="contact">
+    <div style="font-size:16px;font-weight:700;color:var(--heading);margin-bottom:4px">Request a Free Demo</div>
+    <div style="font-size:13px;color:var(--text);margin-bottom:20px">We'll set up a 20-minute live session in your own M365 tenant.</div>
+
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input class="form-input" type="text" placeholder="Your name"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Work Email</label>
+      <input class="form-input" type="email" placeholder="you@company.com"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Organisation & Number of M365 Users</label>
+      <input class="form-input" type="text" placeholder="e.g. Acme Corp · 250 users"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">What's your biggest M365 challenge right now?</label>
+      <textarea class="form-input" placeholder="Security gaps, licence costs, compliance..."></textarea>
+    </div>
+    <button class="form-submit" onclick="handleFormSubmit(this)">
+      Request Free Demo →
+    </button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <div class="nav-logo-mark" style="width:28px;height:28px;border-radius:7px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    TenantGuardian <span style="color:#00bcf2;margin-left:3px">AI</span>
+  </div>
+  <div class="footer-copy">
+    © 2025 TenantGuardian AI · Crafted with ♥ by <strong style="color:rgba(0,188,242,.6)">Joydeep</strong> · All rights reserved
+  </div>
+  <div class="footer-links">
+    <a href="TenantGuardianAI.html">Sign In</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+// ── LIVE COUNTER ANIMATION ──────────────────────────────────────
+function animateCounter(el, target, prefix, suffix, duration){
+  const start = Date.now();
+  const step = () => {
+    const progress = Math.min((Date.now() - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.floor(eased * target);
+    el.textContent = prefix + current.toLocaleString('en-IN') + suffix;
+    if(progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    // These numbers update manually — change them as you grow
+    animateCounter(document.getElementById('statWaste'),   2340000, '₹', '', 2000);
+    animateCounter(document.getElementById('statGaps'),    847,     '',  '', 1800);
+    animateCounter(document.getElementById('statTenants'), 23,      '',  '', 1500);
+    animateCounter(document.getElementById('statUsers'),   4200,    '',  '', 2000);
+  }, 400);
+});
+
+// ── SCROLL REVEAL ───────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── TYPING EFFECT FOR PREVIEW ───────────────────────────────────
+const fullText = document.getElementById('previewAIText').innerHTML;
+
+// ── FORM SUBMIT ─────────────────────────────────────────────────
+function handleFormSubmit(btn){
+  const inputs = btn.closest('.contact-form').querySelectorAll('input, textarea');
+  let valid = true;
+  inputs.forEach(i => { if(!i.value.trim()){ i.style.borderColor='var(--red)'; valid=false; } else i.style.borderColor=''; });
+  if(!valid){ return; }
+
+  btn.textContent = '✓ Request Received!';
+  btn.style.background = 'var(--green)';
+  btn.disabled = true;
+
+  // In production — connect this to your email/CRM
+  // For now it just shows confirmation
+  setTimeout(() => {
+    btn.closest('.contact-form').innerHTML = `
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:40px;margin-bottom:14px">✅</div>
+        <div style="font-size:17px;font-weight:700;color:var(--heading);margin-bottom:8px">Demo request received!</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.7">
+          We'll be in touch within 24 hours to schedule your free 20-minute demo.<br/>
+          In the meantime, feel free to <a href="TenantGuardianAI.html" style="color:var(--cyan)">sign in and explore</a>.
+        </div>
+      </div>`;
+  }, 1500);
+}
+
+// ── SMOOTH SCROLL ───────────────────────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target){ e.preventDefault(); target.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
+});
+</script>
+</body>
+</html>
