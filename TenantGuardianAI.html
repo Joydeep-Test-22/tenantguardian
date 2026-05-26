@@ -970,7 +970,7 @@ select.filter-sel{
   </div>
   <div class="phi-4-badge" style="background:rgba(0,188,242,.08);border-color:rgba(0,188,242,.2);color:#00bcf2;font-size:10px;display:flex;align-items:center;gap:5px">
     <svg style="width:10px;height:10px;color:#00bcf2" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-    Microsoft Phi-4 Active
+    AI is Active
   </div>
   <div class="top-right">
     <!-- Role badge -->
@@ -1561,7 +1561,7 @@ Results are significantly more accurate than rule-based thresholds and can be re
         <svg style="width:20px;height:20px;color:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <div class="page-title">CFO Savings Report</div>
       </div>
-      <div class="page-sub" style="margin-bottom:20px">Microsoft Phi-4 generates a boardroom-ready report with financials, findings, and 90-day action plan</div>
+      <div class="page-sub" style="margin-bottom:20px">AI generates a boardroom-ready report with financials, findings, and 90-day action plan</div>
 
       <div style="display:flex;gap:8px;margin-bottom:16px">
         <button class="btn btn-primary" id="runReportBtn" onclick="runCFOReport()" disabled>
@@ -2147,7 +2147,7 @@ Results are significantly more accurate than rule-based thresholds and can be re
 <!-- STATUS BAR -->
 <div class="statusbar" id="statusBar" style="display:none">
   <span id="sbStatus">Ready</span>
-  <span>AI Engine: <strong>Microsoft Phi-4 Active</strong></span>
+  <span>AI Engine: <strong>AI Active</strong></span>
   <span style="margin-left:auto;display:flex;align-items:center;gap:16px">
     <span style="color:rgba(255,255,255,0.18);font-size:9.5px;letter-spacing:.04em">
       © 2025 TenantGuardian AI — Crafted by <strong style="color:rgba(0,188,242,0.5)">Joydeep</strong> · All rights reserved
@@ -2253,7 +2253,7 @@ async function callGroq(systemPrompt, userPrompt){
 // Stream AI text into a DOM element (simulated — GitHub Models non-streaming)
 async function streamGroq(systemPrompt, userPrompt, targetEl){
   targetEl.classList.add('streaming');
-  targetEl.innerHTML='<span style="color:var(--muted)">Microsoft Phi-4 is analysing…</span>';
+  targetEl.innerHTML='<span style="color:var(--muted)">AI is analysing…</span>';
 
   try{
     const text = await callAI(systemPrompt, userPrompt);
@@ -3162,7 +3162,7 @@ async function runOverviewAI(){
   const monthly=wasted.length*CONFIG.licenseMonthlyUSD;
 
   const el=document.getElementById('overviewAIText');
-  el.innerHTML='<span style="color:var(--muted)">Microsoft Phi-4 is analysing your tenant…</span>';
+  el.innerHTML='<span style="color:var(--muted)">AI is analysing your tenant…</span>';
 
   const system=`You are a Microsoft 365 licensing expert. Analyse usage data and give sharp, direct insights. Be concise and financial. Use markdown formatting.`;
   const prompt=`Analyse this M365 tenant licence data and give a 3-paragraph executive overview:
